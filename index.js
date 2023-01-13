@@ -1,6 +1,6 @@
-import { Configuration, OpenAIApi } from 'openai';
-import TelegramBot from 'node-telegram-bot-api';
-import { config } from "dotenv";
+const { Configuration, OpenAIApi } = require('openai');
+const TelegramBot = require('node-telegram-bot-api');
+const { config } = require("dotenv");
 
 config();
 
