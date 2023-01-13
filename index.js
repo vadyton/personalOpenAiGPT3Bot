@@ -16,17 +16,21 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 async function getResponseFromGPT3(text) {
-    const response = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: text,
-        temperature: 0.5,
-        max_tokens: 360,
-        top_p: 1.0,
-        frequency_penalty: 0.5,
-        presence_penalty: 0.0,
-    });
+    try {
+        const response = await openai.createCompletion({
+            model: "text-davinci-003",
+            prompt: text,
+            temperature: 0.5,
+            max_tokens: 360,
+            top_p: 1.0,
+            frequency_penalty: 0.5,
+            presence_penalty: 0.0,
+        });
 
-    return response;
+        return response;
+    } catch(error) {
+        return `Ошибка: ${error}`;
+    }
 }
 
 async function messageHandler(msg) {
