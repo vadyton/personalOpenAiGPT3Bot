@@ -32,34 +32,35 @@ async function getResponseFromGPT3(text) {
 
         return response;
     } catch(error) {
-        return `Ошибка: ${error}`;
+        return `GPT-3 response error: ${error}`;
     }
 }
 
 async function getTranslate(text, lang = 'ru') {
-    const config = {
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": `Api-Key ${apiKey}`
-        }
-    };
-
-    const body = JSON.stringify({
-        "targetLanguageCode": lang,
-        "texts": [text],
-        folderId,
-    });
-
     try {
+        const config = {
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": `Api-Key ${apiKey}`
+            }
+        };
+
+        const body = JSON.stringify({
+            "targetLanguageCode": lang,
+            "texts": [text],
+            folderId,
+        });
+
         const response = await axios.post('https://translate.api.cloud.yandex.net/translate/v2/translate', body, config)
         return response.data.translations[0].text;
     } catch(error) {
-        return `\nTranslate error: ${error}`;
+        return `Translate error: ${error}`;
     }
 }
 
 async function messageHandler(msg) {
     const chatId = msg.chat.id;
+
     if (chatId == adminId) {
         const response = await getResponseFromGPT3(msg.text);
         const responseText = response.data.choices[0].text;
@@ -83,10 +84,12 @@ bot.on('message', (msg) => messageHandler(msg))
 
 bot.on('callback_query', async (query) => {
     const chatId = query.message.chat.id;
+    const text = query.message.text;
     const data = query.data;
+
     switch (data) {
         case 'translate':
-            const translatedResponseText = await getTranslate(query.message.text);
+            const translatedResponseText = await getTranslate(text);
             bot.sendMessage(chatId, translatedResponseText);
             break;
     }
