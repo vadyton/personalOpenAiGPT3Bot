@@ -1,12 +1,15 @@
 const { Configuration, OpenAIApi } = require('openai');
 const TelegramBot = require('node-telegram-bot-api');
 const { config } = require("dotenv");
+const axios = require("axios");
 
 config();
 
 const openAiKey = process.env.OPENAI_API_KEY;
 const botToken = process.env.TELEGRAM_API_TOKEN;
 const adminId = process.env.ADMIN_ID;
+const apiKey = process.env.YANDEX_TRANSLATE_API_KEY;;
+const folderId = process.env.YANDEX_FOLDER_ID;;
 
 const bot = new TelegramBot(botToken, { polling: true });
 
@@ -21,7 +24,7 @@ async function getResponseFromGPT3(text) {
             model: "text-davinci-003",
             prompt: text,
             temperature: 0.5,
-            max_tokens: 360,
+            max_tokens: 1000,
             top_p: 1.0,
             frequency_penalty: 0.5,
             presence_penalty: 0.0,
@@ -33,13 +36,58 @@ async function getResponseFromGPT3(text) {
     }
 }
 
+async function getTranslate(text, lang = 'ru') {
+    const config = {
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": `Api-Key ${apiKey}`
+        }
+    };
+
+    const body = JSON.stringify({
+        "targetLanguageCode": lang,
+        "texts": [text],
+        folderId,
+    });
+
+    try {
+        const response = await axios.post('https://translate.api.cloud.yandex.net/translate/v2/translate', body, config)
+        return response.data.translations[0].text;
+    } catch(error) {
+        return `\nTranslate error: ${error}`;
+    }
+}
+
 async function messageHandler(msg) {
-    if (msg.from.id == adminId) {
-        const res = await getResponseFromGPT3(msg.text);
-        bot.sendMessage(msg.chat.id, res.data.choices[0].text);
+    const chatId = msg.chat.id;
+    if (chatId == adminId) {
+        const response = await getResponseFromGPT3(msg.text);
+        const responseText = response.data.choices[0].text;
+
+        const options = {
+            reply_markup: JSON.stringify({
+                inline_keyboard: [[{
+                    text: 'Translate',
+                    callback_data: 'translate'
+                }]]
+            })
+        };
+
+        bot.sendMessage(chatId, responseText, options);
     } else {
         bot.sendMessage(msg.chat.id, 'Access denied!')
     }
 }
 
 bot.on('message', (msg) => messageHandler(msg))
+
+bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id;
+    const data = query.data;
+    switch (data) {
+        case 'translate':
+            const translatedResponseText = await getTranslate(query.message.text);
+            bot.sendMessage(chatId, translatedResponseText);
+            break;
+    }
+});
