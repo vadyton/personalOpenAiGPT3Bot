@@ -8,8 +8,9 @@ config();
 const openAiKey = process.env.OPENAI_API_KEY;
 const botToken = process.env.TELEGRAM_API_TOKEN;
 const adminId = process.env.ADMIN_ID;
-const apiKey = process.env.YANDEX_TRANSLATE_API_KEY;;
-const folderId = process.env.YANDEX_FOLDER_ID;;
+const userIds = (process.env.USER_IDS).split(', ');
+const apiKey = process.env.YANDEX_TRANSLATE_API_KEY;
+const folderId = process.env.YANDEX_FOLDER_ID;
 
 const bot = new TelegramBot(botToken, { polling: true });
 
@@ -61,7 +62,7 @@ async function getTranslate(text, lang = 'ru') {
 async function messageHandler(msg) {
     const chatId = msg.chat.id;
 
-    if (chatId == adminId) {
+    if (chatId == adminId || userIds.includes(`${chatId}`)) {
         const response = await getResponseFromGPT3(msg.text);
         const responseText = response.data.choices[0].text;
 
