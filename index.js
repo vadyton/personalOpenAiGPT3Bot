@@ -72,8 +72,7 @@ async function messageHandler(msg) {
                 access: false,
             }
         });
-        console.log(created);
-        if (!created) {
+        if (created) {
             await bot.sendMessage(adminId, `New user @${msg.from.username} ${user.dataValues} `);
         }
         
