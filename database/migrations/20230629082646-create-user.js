@@ -21,6 +21,11 @@ module.exports = {
       lastname: {
         type: Sequelize.STRING
       },
+      access: {
+        allowNull: false,
+        default: false,
+        type: Sequelize.BOOLEAN
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
