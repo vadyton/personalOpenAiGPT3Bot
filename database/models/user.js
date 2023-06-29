@@ -17,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
     telegramId: DataTypes.BIGINT,
     username: DataTypes.STRING,
     firstname: DataTypes.STRING,
-    lastname: DataTypes.STRING
+    lastname: DataTypes.STRING,
+    access: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'User',
