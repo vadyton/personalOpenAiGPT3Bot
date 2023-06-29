@@ -62,14 +62,14 @@ async function getTranslate(text, lang = 'ru') {
 
 async function messageHandler(msg) {
     if (msg.text === '/start') {
-        console.log(msg.from)
-        // const [ user, created ] = await User.findOrCreate({
-        //     where: { telegramId: msg.from.id},
-        //     defaults: { telegramId: msg.from.id, username: msg.from.id, firstname: msg.from.id, lastname: msg.from.id }
-        // });
+        const [ user, created ] = await User.findOrCreate({
+            where: { telegramId: msg.from.id},
+            defaults: { telegramId: msg.from.id, username: msg.from.username, firstname: msg.from.first_name, lastname: msg.from?.last_name }
+        });
+        console.log(created, user);
+        await bot.sendMessage(adminId, `New user ${msg.from.username}`);
     } else {
         const chatId = msg.chat.id;
-    
         if (chatId == adminId || userIds.includes(`${chatId}`)) {
             const response = await getResponseFromGPT3(msg.text);
             const responseText = response.data.choices[0].text;
