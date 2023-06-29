@@ -62,19 +62,24 @@ async function getTranslate(text, lang = 'ru') {
 
 async function messageHandler(msg) {
     if (msg.text === '/start') {
-        const [ user, created ] = await User.findOrCreate({
-            where: { telegramId: msg.from.id},
-            defaults: {
-                telegramId: msg.from.id,
-                username: msg.from.username,
-                firstname: msg.from?.first_name,
-                lastname: msg.from?.last_name,
-                access: false,
+        try {
+            const [ user, created ] = await User.findOrCreate({
+                where: { telegramId: msg.from.id},
+                defaults: {
+                    telegramId: msg.from.id,
+                    username: msg.from.username,
+                    firstname: msg.from?.first_name,
+                    lastname: msg.from?.last_name,
+                    access: false,
+                }
+            });
+            if (created) {
+                await bot.sendMessage(adminId, `New user @${msg.from.username}`);
             }
-        });
-        if (created) {
-            await bot.sendMessage(adminId, `New user @${msg.from.username} ${user.dataValues} `);
+        } catch (error) {
+            await bot.sendMessage(adminId, `New user error ${error}`);
         }
+        
         
     } else {
         const chatId = msg.chat.id;
