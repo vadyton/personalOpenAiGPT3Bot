@@ -2,6 +2,7 @@ const { Configuration, OpenAIApi } = require('openai');
 const TelegramBot = require('node-telegram-bot-api');
 const { config } = require("dotenv");
 const axios = require("axios");
+const { User } = require('./database/models')
 
 config();
 
@@ -60,24 +61,32 @@ async function getTranslate(text, lang = 'ru') {
 }
 
 async function messageHandler(msg) {
-    const chatId = msg.chat.id;
-
-    if (chatId == adminId || userIds.includes(`${chatId}`)) {
-        const response = await getResponseFromGPT3(msg.text);
-        const responseText = response.data.choices[0].text;
-
-        const options = {
-            reply_markup: JSON.stringify({
-                inline_keyboard: [[{
-                    text: 'Translate',
-                    callback_data: 'translate'
-                }]]
-            })
-        };
-
-        bot.sendMessage(chatId, responseText, options);
+    if (msg.text === '/start') {
+        console.log(msg.from)
+        // const [ user, created ] = await User.findOrCreate({
+        //     where: { telegramId: msg.from.id},
+        //     defaults: { telegramId: msg.from.id, username: msg.from.id, firstname: msg.from.id, lastname: msg.from.id }
+        // });
     } else {
-        bot.sendMessage(msg.chat.id, 'Access denied!')
+        const chatId = msg.chat.id;
+    
+        if (chatId == adminId || userIds.includes(`${chatId}`)) {
+            const response = await getResponseFromGPT3(msg.text);
+            const responseText = response.data.choices[0].text;
+    
+            const options = {
+                reply_markup: JSON.stringify({
+                    inline_keyboard: [[{
+                        text: 'Translate',
+                        callback_data: 'translate'
+                    }]]
+                })
+            };
+    
+            bot.sendMessage(chatId, responseText, options);
+        } else {
+            bot.sendMessage(msg.chat.id, 'Access denied!')
+        }
     }
 }
 
