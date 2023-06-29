@@ -64,7 +64,7 @@ async function messageHandler(msg) {
     if (msg.text === '/start') {
         try {
             const [ user, created ] = await User.findOrCreate({
-                where: { telegramId: msg.from.id},
+                where: { telegramId: String(msg.from.id)},
                 defaults: {
                     telegramId: msg.from.id,
                     username: msg.from.username,
