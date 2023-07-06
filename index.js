@@ -20,10 +20,12 @@ let userIds = [];
 
 (async function updateUserIds() {
     try {
-        userIds = await User.findAll({
+        userIds = (await User.findAll({
             where: { access: true },
             attributes: ['telegramId']
-        });
+        })).map((el) => +(el.toJSON()).telegramId);
+
+        console.log(userIds);
     } catch (error) {
         console.log(error.message);
     }
