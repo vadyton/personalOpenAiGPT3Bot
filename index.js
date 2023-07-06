@@ -188,16 +188,18 @@ async function callbackQueryHandler(query){
     const data = query.data;
 
     const userIdRegex = new RegExp(/id:(\d+)/);
-    const userId = userIdRegex.exec(query.message.text)[1];
+    let userId;
 
     switch (data) {
         case TRANSLATE:
             sendTranslation(chatId, text);
             break;
         case ACCESS:
+            userId = userIdRegex.exec(query.message.text)[1];
             giveAccessToUser(userId);
             break;
         case CANCEL_ACCESS:
+            userId = userIdRegex.exec(query.message.text)[1];
             accessWasDenied(userId);
             break;
 
